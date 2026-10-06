@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ブラックエプロン対策 暗記カード</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        /* 3D Flip Card Styles */
+        .perspective-1000 { perspective: 1000px; }
+        .transform-style-3d { transform-style: preserve-3d; }
+        .backface-hidden { backface-visibility: hidden; }
+        .rotate-y-180 { transform: rotateY(180deg); }
+        .card-transition { transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        .whitespace-pre-wrap { white-space: pre-wrap; }
+    </style>
+</head>
+<body class="bg-[#f2f0eb] text-stone-800 font-sans min-h-screen">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useMemo } = React;
+
+        // コアコーヒーのデータ（公式サイト基準）
+        const coffeeBeans = [
+            {
+                name: "スターバックス ライトノート ブレンド®",
+                roast: "ブロンドロースト",
+                acidity: "MEDIUM (中程度)",
+                body: "LIGHT (軽め)",
+                process: "水洗式",
+                keywords: "軽やかなコクと程よい酸味",
+                flavors: "ミルクチョコレート、煎ったナッツ"
+            },
+            {
+                name: "ブレックファースト ブレンド",
+                roast: "ミディアムロースト",
+                acidity: "HIGH (高い)",
+                body: "LIGHT (軽め)",
+                process: "水洗式",
+                keywords: "はじけるような、シトラス感のある",
+                flavors: "ナッツ、リンゴ、ブルーベリー、レモン"
+            },
+            {
+                name: "ケニア",
+                roast: "ミディアムロースト",
+                acidity: "HIGH (高い)",
+                body: "FULL (しっかり)",
+                process: "水洗式",
+                keywords: "ジューシーな、複雑な",
+                flavors: "グレープフルーツ、ベリー類、カラント（スグリ）、レーズン、オレンジ"
+            },
+            {
+                name: "パイクプレイス® ロースト",
+                roast: "ミディアムロースト",
+                acidity: "MEDIUM (中程度)",
+                body: "MEDIUM (中程度)",
+                process: "水洗式/半水洗式",
+                keywords: "ココアや煎ったナッツのようなほのかな香ばしさ、なめらかな口あたり",
+                flavors: "ナッツ、チョコレート、シナモン"
+            },
+            {
+                name: "グアテマラ アンティグア",
+                roast: "ミディアムロースト",
+                acidity: "HIGH (高い)",
+                body: "MEDIUM (中程度)",
+                process: "水洗式",
+                keywords: "ココアやかすかなスパイス、レモンのような風味",
+                flavors: "ココア、リンゴ、キャラメル、ナッツ"
+            },
+            {
+                name: "エチオピア",
+                roast: "ミディアムロースト",
+                acidity: "HIGH (高い)",
+                body: "MEDIUM (中程度)",
+                process: "水洗式",
+                keywords: "ダークチョコレート、スイートシトラス",
+                flavors: "ダークチョコレート、スイートシトラス"
+            },
+            {
+                name: "ハウス ブレンド",
+                roast: "ミディアムロースト",
+                acidity: "MEDIUM (中程度)",
+                body: "MEDIUM (中程度)",
+                process: "水洗式",
+                keywords: "豊かな香りに、いきいきとした酸味",
+                flavors: "ナッツ、リンゴ、ブルーベリー"
+            },
+            {
+                name: "コロンビア",
+                roast: "ミディアムロースト",
+                acidity: "MEDIUM (中程度)",
+                body: "MEDIUM (中程度)",
+                process: "水洗式",
+                keywords: "ナッツを感じさせる風味",
+                flavors: "ミルクチョコレート、ピーカンナッツ"
+            },
+            {
+                name: "TOKYO ロースト",
+                roast: "ミディアムロースト",
+                acidity: "MEDIUM (中程度)",
+                body: "FULL (しっかり)",
+                process: "水洗式/半水洗式",
+                keywords: "なめらかで深みのある味わい",
+                flavors: "シナモン、レーズン、オートミール、チョコレート"
+            },
+            {
+                name: "スマトラ",
+                roast: "ダークロースト",
+                acidity: "LOW (低い)",
+                body: "FULL (しっかり)",
+                process: "半水洗式",
+                keywords: "大地やハーブを思わせる風味",
+                flavors: "シナモン、オートミール、メープル、バター、チーズ、ハーブ"
+            },
+            {
+                name: "コモド ドラゴン ブレンド®",
+                roast: "ダークロースト",
+                acidity: "LOW (低い)",
+                body: "FULL (しっかり)",
+                process: "半水洗式/水洗式",
+                keywords: "大地やハーブ、スパイスを感じさせる風味",
+                flavors: "シナモン、メープル、バター、チーズ、ハーブ"
+            },
+            {
+                name: "カフェ ベロナ®",
+                roast: "ダークロースト",
+                acidity: "LOW (低い)",
+                body: "FULL (しっかり)",
+                process: "水洗式/半水洗式",
+                keywords: "ダークココアのような口あたり、ロースト感のある甘み",
+                flavors: "ミルクチョコレート、ダークチョコレート、カラメル"
+            },
+            {
+                name: "エスプレッソ ロースト",
+                roast: "ダークロースト",
+                acidity: "MEDIUM (中程度)",
+                body: "FULL (しっかり)",
+                process: "水洗式/半水洗式",
+                keywords: "濃厚でキャラメルのような甘み",
+                flavors: "キャラメル、チョコレート、スパイス"
+            },
+            {
+                name: "フェアトレード イタリアン ロースト",
+                roast: "ダークロースト",
+                acidity: "LOW (低い)",
+                body: "MEDIUM (中程度)",
+                process: "水洗式",
+                keywords: "ロースト感のある甘みと、ダークココアを感じさせる風味",
+                flavors: "ダークチョコレート、カラメル、スパイス"
+            },
+            {
+                name: "フレンチ ロースト",
+                roast: "ダークロースト",
+                acidity: "LOW (低い)",
+                body: "LIGHT (軽め)",
+                process: "水洗式",
+                keywords: "強くスモーキーな風味",
+                flavors: "煎ったナッツ、カラメル、ローストした野菜"
+            }
+        ];
+
+        const App = () => {
+            const [mode, setMode] = useState('all');
+            const [cards, setCards] = useState([]);
+            const [currentIndex, setCurrentIndex] = useState(0);
+            const [isFlipped, setIsFlipped] = useState(false);
+
+            // モードに応じたデッキ（カード束）の生成
+            const generateCards = (selectedMode) => {
+                let newCards = [];
+                coffeeBeans.forEach(bean => {
+                    if (selectedMode === 'details' || selectedMode === 'all') {
+                        newCards.push({
+                            type: '総合',
+                            q: `${bean.name}\nの全体的な特徴は？`,
+                            a: `【ロースト】${bean.roast}\n【酸味】${bean.acidity}\n【コク】${bean.body}\n【加工法】${bean.process}\n\n【キーワード】\n${bean.keywords}\n\n【相性のよいフレーバー】\n${bean.flavors}`
+                        });
+                    }
+                    if (selectedMode === 'roast' || selectedMode === 'all') {
+                        newCards.push({ type: 'ロースト', q: `${bean.name}\nのローストレベルは？`, a: bean.roast });
+                    }
+                    if (selectedMode === 'acidity' || selectedMode === 'all') {
+                        newCards.push({ type: '酸味', q: `${bean.name}\nの酸味 (Acidity) は？`, a: bean.acidity });
+                    }
+                    if (selectedMode === 'body' || selectedMode === 'all') {
+                        newCards.push({ type: 'コク', q: `${bean.name}\nのコク (Body) は？`, a: bean.body });
+                    }
+                    if (selectedMode === 'process' || selectedMode === 'all') {
+                        newCards.push({ type: '加工法', q: `${bean.name}\nの加工法は？`, a: bean.process });
+                    }
+                    if (selectedMode === 'keywords' || selectedMode === 'all') {
+                        newCards.push({ type: 'キーワード', q: `キーワード：\n「${bean.keywords}」\n\nこのコーヒー豆は何？`, a: bean.name });
+                    }
+                    if (selectedMode === 'flavors' || selectedMode === 'all') {
+                        newCards.push({ type: 'フレーバー', q: `相性のよいフレーバー：\n「${bean.flavors}」\n\nこのコーヒー豆は何？`, a: bean.name });
+                    }
+                });
+                return newCards;
+            };
+
+            // シャッフル機能 (Fisher-Yates)
+            const shuffleArray = (array) => {
+                let shuffled = [...array];
+                for (let i = shuffled.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+                }
+                return shuffled;
+            };
+
+            // モードが変更されたらカードを再生成
+            useEffect(() => {
+                let newCards = generateCards(mode);
+                setCards(shuffleArray(newCards));
+                setCurrentIndex(0);
+                setIsFlipped(false);
+            }, [mode]);
+
+            const handleShuffle = () => {
+                setCards(shuffleArray(cards));
+                setCurrentIndex(0);
+                setIsFlipped(false);
+            };
+
+            const nextCard = () => {
+                if (currentIndex < cards.length - 1) {
+                    setIsFlipped(false);
+                    setTimeout(() => setCurrentIndex(currentIndex + 1), 150);
+                }
+            };
+
+            const prevCard = () => {
+                if (currentIndex > 0) {
+                    setIsFlipped(false);
+                    setTimeout(() => setCurrentIndex(currentIndex - 1), 150);
+                }
+            };
+
+            if (cards.length === 0) return null;
+
+            const currentCard = cards[currentIndex];
+
+            return (
+                <div className="max-w-md mx-auto min-h-screen flex flex-col p-4">
+                    <header className="text-center mb-6 mt-4">
+                        <h1 className="text-2xl font-bold text-[#006241] mb-2">Black Apron Study</h1>
+                        <p className="text-sm text-stone-500">コアコーヒー 暗記カード</p>
+                    </header>
+
+                    {/* 設定エリア */}
+                    <div className="mb-6 flex flex-col gap-3">
+                        <select 
+                            value={mode} 
+                            onChange={(e) => setMode(e.target.value)}
+                            className="p-3 rounded-lg border border-stone-300 bg-white shadow-sm text-stone-700 focus:outline-none focus:ring-2 focus:ring-[#006241]"
+                        >
+                            <option value="all">すべての問題をミックス</option>
+                            <option value="details">【総合】豆の名前から全情報を当てる</option>
+                            <option value="roast">【単答】ローストレベルを当てる</option>
+                            <option value="acidity">【単答】酸味 (Acidity) を当てる</option>
+                            <option value="body">【単答】コク (Body) を当てる</option>
+                            <option value="process">【単答】加工法 (水洗式など) を当てる</option>
+                            <option value="keywords">【逆引き】キーワードから豆を当てる</option>
+                            <option value="flavors">【逆引き】フレーバーから豆を当てる</option>
+                        </select>
+                        <button 
+                            onClick={handleShuffle}
+                            className="bg-stone-200 hover:bg-stone-300 text-stone-700 py-2 rounded-lg font-medium transition"
+                        >
+                            🔄 デッキをシャッフルする
+                        </button>
+                    </div>
+
+                    {/* 進捗 */}
+                    <div className="text-center text-stone-500 font-medium mb-3">
+                        {currentIndex + 1} / {cards.length}
+                    </div>
+
+                    {/* カードエリア */}
+                    <div className="flex-1 flex flex-col justify-center perspective-1000">
+                        <div 
+                            className={`relative w-full h-80 cursor-pointer transform-style-3d card-transition ${isFlipped ? 'rotate-y-180' : ''}`}
+                            onClick={() => setIsFlipped(!isFlipped)}
+                        >
+                            {/* 表面 (Question) */}
+                            <div className="absolute inset-0 w-full h-full bg-white rounded-2xl shadow-lg border-2 border-[#006241] flex flex-col items-center justify-center p-6 text-center backface-hidden">
+                                <span className="absolute top-4 left-4 text-xs font-bold bg-[#006241] text-white px-2 py-1 rounded">
+                                    Q: {currentCard.type}
+                                </span>
+                                <h2 className="text-xl font-bold text-stone-800 whitespace-pre-wrap leading-relaxed">
+                                    {currentCard.q}
+                                </h2>
+                                <p className="absolute bottom-4 text-stone-400 text-sm animate-pulse">
+                                    タップして答えを見る
+                                </p>
+                            </div>
+
+                            {/* 裏面 (Answer) */}
+                            <div className="absolute inset-0 w-full h-full bg-[#006241] rounded-2xl shadow-lg border-2 border-[#006241] flex flex-col items-center justify-center p-6 text-center backface-hidden rotate-y-180">
+                                <span className="absolute top-4 left-4 text-xs font-bold bg-white text-[#006241] px-2 py-1 rounded">
+                                    A: Answer
+                                </span>
+                                <div className="text-lg font-bold text-white whitespace-pre-wrap leading-relaxed text-left max-h-[90%] overflow-y-auto w-full px-4">
+                                    {currentCard.a}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* コントロール */}
+                    <div className="flex justify-between items-center mt-8 pb-8">
+                        <button 
+                            onClick={prevCard}
+                            disabled={currentIndex === 0}
+                            className={`px-6 py-3 rounded-full font-bold transition ${currentIndex === 0 ? 'bg-stone-200 text-stone-400 cursor-not-allowed' : 'bg-white text-[#006241] shadow-md hover:bg-stone-50'}`}
+                        >
+                            &larr; 前へ
+                        </button>
+                        <button 
+                            onClick={nextCard}
+                            disabled={currentIndex === cards.length - 1}
+                            className={`px-6 py-3 rounded-full font-bold transition ${currentIndex === cards.length - 1 ? 'bg-stone-200 text-stone-400 cursor-not-allowed' : 'bg-[#006241] text-white shadow-md hover:bg-green-800'}`}
+                        >
+                            次へ &rarr;
+                        </button>
+                    </div>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
+```eof
+
+### このツールの使い方
+1. 上記のコードブロックの右上にある「コピー」ボタンを押し、PCのメモ帳などに貼り付けて `black_apron.html` という名前で保存してください。（文字コードはUTF-8）
+2. 保存したファイルをブラウザ（ChromeやSafariなど）で開くだけで動作します。
+
+### ツールの特徴
+* **カスタマイズ可能な問題形式**: ドロップダウンメニューから「酸味だけを当てる」「キーワードから豆を当てる（逆引き）」など、苦手な項目に絞って集中的に学習できます。
+* **シャッフル機能**: 出題順をランダムに入れ替えられるため、順番で覚えてしまうのを防げます。
+* **スマホ対応**: スマホでファイルを開けば、移動時間や休憩中にも片手でタップしながらサクサク暗記できます。
+
+12月のブラックエプロンテスト、応援しています！毎日のコツコツとしたインプットにぜひご活用ください。何か追加したい豆の情報や機能があれば教えてくださいね。
